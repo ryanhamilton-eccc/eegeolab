@@ -101,45 +101,41 @@ class TasseledCap:
 
 
 class Phase:
-    def __init__(
-        self, mode: int, sin_prefix: str = None, cos_prefix: str = None
-    ) -> None:
-        self.mode = mode
-        self.sin_prefix = sin_prefix
-        self.cos_prefix = cos_prefix
+    def __init__(self, sin: str = None, cos: str = None, name: str = None) -> None:
+        self.sin = sin
+        self.cos = cos
+        self.name = name
 
     def __call__(self, image: ee.Image) -> Any:
         return image.addBands(self.compute(image=image))
 
     @property
-    def sin_prefix(self):
-        return self._sin_prefix
+    def sin(self):
+        return self._sin
 
-    @sin_prefix.setter
-    def sin_prefix(self, prefix: str):
-        if prefix is None:
-            self._sin_prefix = "sin"
+    @sin.setter
+    def sin(self, bname: str):
+        if bname is None:
+            self._sin = "sin"
         else:
-            self._sin_prefix = prefix
+            self._sin = bname
 
     @property
-    def cos_prefix(self):
-        return self._cos_prefix
+    def cos(self):
+        return self._cos
 
-    @cos_prefix.setter
-    def cos_prefix(self, prefix: str):
-        if prefix is None:
-            self._cos_prefix = "cos"
+    @cos.setter
+    def cos(self, bname: str):
+        if bname is None:
+            self._cos = "cos"
         else:
-            self._cos_prefix = prefix
+            self._cos = bname
 
     def compute(self, image: ee.Image) -> ee.Image:
         from math import pi
 
         cos, sin = f"{self.cos_prefix}_{self.mode}", f"{self.sin_prefix}_{self.mode}"
-        return (
-            image.select(sin).atan2(cos).unitScale(-pi, pi).rename(f"phase_{self.mode}")
-        )
+        return image.select(sin).atan2(cos).unitScale(-pi, pi).rename(self.name)
 
 
 class Amplitude:
