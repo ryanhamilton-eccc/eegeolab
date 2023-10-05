@@ -94,7 +94,7 @@ class TasseledCap:
             ee.Image(co)
             .matrixMultiply(arrayImage2D)
             .arrayProject([0])
-            .arrayFlatten([["Brightness", "Greenness", "Wetness"]])
+            .arrayFlatten([["brightness", "greenness", "wetness"]])
         )
 
         return components_image
