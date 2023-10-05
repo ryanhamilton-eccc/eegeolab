@@ -11,3 +11,4 @@ Sphinx
 twine
 earthengine-api
 ipykernel
+folium
