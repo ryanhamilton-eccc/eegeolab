@@ -61,3 +61,40 @@ class SAVI:
                 "L": self.L,
             },
         ).rename(self.name)
+
+
+class TasseledCap:
+    def __init__(
+        self, blue: str, green: str, red: str, nir: str, swir1: str, swir2: str
+    ) -> None:
+        self.blue = blue
+        self.green = green
+        self.red = red
+        self.nir = nir
+        self.swir1 = swir1
+        self.swir2 = swir2
+
+    def __call__(self, image: ee.Image) -> Any:
+        return image.addBands(self.compute(image=image))
+
+    def compute(self, image: ee.Image) -> ee.Image:
+        image = image.select(list(self.__dict__.values()))
+        co_array = [
+            [0.3037, 0.2793, 0.4743, 0.5585, 0.5082, 0.1863],
+            [-0.2848, -0.2435, -0.5436, 0.7243, 0.0840, -0.1800],
+            [0.1509, 0.1973, 0.3279, 0.3406, -0.7112, -0.4572],
+        ]
+
+        co = ee.Array(co_array)
+
+        arrayImage1D = image.toArray()
+        arrayImage2D = arrayImage1D.toArray(1)
+
+        components_image = (
+            ee.Image(co)
+            .matrixMultiply(arrayImage2D)
+            .arrayProject([0])
+            .arrayFlatten([["Brightness", "Greenness", "Wetness"]])
+        )
+
+        return components_image
