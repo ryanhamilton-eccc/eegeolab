@@ -98,3 +98,43 @@ class TasseledCap:
         )
 
         return components_image
+
+
+class Phase:
+    def __init__(
+        self, mode: int, sin_prefix: str = None, cos_prefix: str = None
+    ) -> None:
+        self.mode = mode
+        self.sin_prefix = sin_prefix
+        self.cos_prefix = cos_prefix
+
+    def __call__(self, image: ee.Image) -> Any:
+        return image.addBands(self.compute(image=image))
+
+    @property
+    def sin_prefix(self):
+        return self._sin_prefix
+
+    @sin_prefix.setter
+    def sin_prefix(self, prefix: str):
+        if prefix is None:
+            self._sin_prefix = "sin"
+        else:
+            self._sin_prefix = prefix
+
+    @property
+    def cos_prefix(self):
+        return self._cos_prefix
+
+    @cos_prefix.setter
+    def cos_prefix(self, prefix: str):
+        if prefix is None:
+            self._cos_prefix = "cos"
+        else:
+            self._cos_prefix = prefix
+
+    def compute(self, image: ee.Image) -> ee.Image:
+        from math import pi
+
+        cos, sin = f"{self.cos_prefix}_{self.mode}", f"{self.sin_prefix}_{self.mode}"
+        return image.select(sin).atan2(cos).unitScale(-pi, pi)
