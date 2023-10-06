@@ -5,7 +5,7 @@
 
 import unittest
 
-from eegeolab import bmath
+from eegeolab import calculators
 
 
 class TestEegeolab(unittest.TestCase):
