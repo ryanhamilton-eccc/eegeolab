@@ -100,79 +100,28 @@ class TasseledCap:
         return components_image
 
 
-class Phase:
-    def __init__(self, sin: str = None, cos: str = None, name: str = None) -> None:
-        self.sin = sin
-        self.cos = cos
+class Ratio:
+    def __init__(self, num: str, denom: str, name: str = None) -> None:
+        self.num = num
+        self.denom = denom
         self.name = name
 
     def __call__(self, image: ee.Image) -> Any:
         return image.addBands(self.compute(image=image))
 
     @property
-    def sin(self):
-        return self._sin
+    def name(self):
+        return self._name
 
-    @sin.setter
-    def sin(self, bname: str):
-        if bname is None:
-            self._sin = "sin"
-        else:
-            self._sin = bname
-
-    @property
-    def cos(self):
-        return self._cos
-
-    @cos.setter
-    def cos(self, bname: str):
-        if bname is None:
-            self._cos = "cos"
-        else:
-            self._cos = bname
+    @name.setter
+    def name(self, value):
+        self._name = f"{self.num}/{self.denom}" if value is None else value
 
     def compute(self, image: ee.Image) -> ee.Image:
-        from math import pi
-
-        cos, sin = f"{self.cos_prefix}_{self.mode}", f"{self.sin_prefix}_{self.mode}"
-        return image.select(sin).atan2(cos).unitScale(-pi, pi).rename(self.name)
-
-
-class Amplitude:
-    def __init__(
-        self, mode: int, sin_prefix: str = None, cos_prefix: str = None
-    ) -> None:
-        self.mode = mode
-        self.sin_prefix = sin_prefix
-        self.cos_prefix = cos_prefix
-
-    def __call__(self, image: ee.Image) -> Any:
-        return image.addBands(self.compute(image=image))
-
-    @property
-    def sin_prefix(self):
-        return self._sin_prefix
-
-    @sin_prefix.setter
-    def sin_prefix(self, prefix: str):
-        if prefix is None:
-            self._sin_prefix = "sin"
-        else:
-            self._sin_prefix = prefix
-
-    @property
-    def cos_prefix(self):
-        return self._cos_prefix
-
-    @cos_prefix.setter
-    def cos_prefix(self, prefix: str):
-        if prefix is None:
-            self._cos_prefix = "cos"
-        else:
-            self._cos_prefix = prefix
-
-    def compute(self, image: ee.Image) -> ee.Image:
-        from math import pi
-
-        cos, sin = f"{self.cos_prefix}_{self.mode}", f"{self.sin_prefix}_{self.mode}"
-        return image.select(sin).hypot(cos).rename(f"amp_{self.mode}")
+        return image.expression(
+            expression="NUMERATOR / DENOMINATOR",
+            opt_map={
+                "NUMERATOR": image.select(self.num),
+                "DENOMINATOR": image.select(self.denom),
+            },
+        ).rename(self.name)
