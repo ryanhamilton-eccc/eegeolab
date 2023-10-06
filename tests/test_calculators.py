@@ -5,7 +5,7 @@
 
 import unittest
 
-from eegeolab import eegeolab
+from eegeolab import calculators
 
 
 class TestEegeolab(unittest.TestCase):

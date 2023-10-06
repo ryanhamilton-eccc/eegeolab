@@ -1,0 +1,127 @@
+from typing import Any
+import ee
+
+
+# TODO add NDVI, SAVI, Tasseled cap, phase, amplitude
+
+
+class NDVI:
+    def __init__(self, nir: str, red: str, name: str = None) -> None:
+        self.nir = nir
+        self.red = red
+        self.name = name
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name: str):
+        self._name = "NDVI" if name is None else name
+
+    def __call__(self, image: ee.Image) -> Any:
+        return image.addBands(self.compute(image=image))
+
+    def compute(self, image: ee.Image) -> ee.Image:
+        """Computes the NDVI for the input Image
+
+        Args:
+            image (ee.Image): Image to calculate NDVI
+
+        Returns:
+            ee.Image: a Image that represents the NDVI values
+        """
+        return image.normalizedDifference([self.nir, self.red]).rename(self.name)
+
+
+class SAVI:
+    def __init__(self, nir: str, red: str, L: float = 0.5, name: str = None) -> None:
+        self.nir = nir
+        self.red = red
+        self.L = L
+        self.name = name
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name: str):
+        self._name = "SAVI" if name is None else name
+
+    def __call__(self, image: ee.Image) -> Any:
+        return image.addBands(self.compute(image=image))
+
+    def compute(self, image: ee.Image) -> ee.Image:
+        return image.expression(
+            "(1 + L) * (NIR - RED) / (NIR + RED + L)",
+            {
+                "NIR": image.select(self.nir),
+                "RED": image.select(self.red),
+                "L": self.L,
+            },
+        ).rename(self.name)
+
+
+class TasseledCap:
+    def __init__(
+        self, blue: str, green: str, red: str, nir: str, swir1: str, swir2: str
+    ) -> None:
+        self.blue = blue
+        self.green = green
+        self.red = red
+        self.nir = nir
+        self.swir1 = swir1
+        self.swir2 = swir2
+
+    def __call__(self, image: ee.Image) -> Any:
+        return image.addBands(self.compute(image=image))
+
+    def compute(self, image: ee.Image) -> ee.Image:
+        image = image.select(list(self.__dict__.values()))
+        co_array = [
+            [0.3037, 0.2793, 0.4743, 0.5585, 0.5082, 0.1863],
+            [-0.2848, -0.2435, -0.5436, 0.7243, 0.0840, -0.1800],
+            [0.1509, 0.1973, 0.3279, 0.3406, -0.7112, -0.4572],
+        ]
+
+        co = ee.Array(co_array)
+
+        arrayImage1D = image.toArray()
+        arrayImage2D = arrayImage1D.toArray(1)
+
+        components_image = (
+            ee.Image(co)
+            .matrixMultiply(arrayImage2D)
+            .arrayProject([0])
+            .arrayFlatten([["brightness", "greenness", "wetness"]])
+        )
+
+        return components_image
+
+
+class Ratio:
+    def __init__(self, num: str, denom: str, name: str = None) -> None:
+        self.num = num
+        self.denom = denom
+        self.name = name
+
+    def __call__(self, image: ee.Image) -> Any:
+        return image.addBands(self.compute(image=image))
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = f"{self.num}/{self.denom}" if value is None else value
+
+    def compute(self, image: ee.Image) -> ee.Image:
+        return image.expression(
+            expression="NUMERATOR / DENOMINATOR",
+            opt_map={
+                "NUMERATOR": image.select(self.num),
+                "DENOMINATOR": image.select(self.denom),
+            },
+        ).rename(self.name)
