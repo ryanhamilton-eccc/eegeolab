@@ -4,14 +4,16 @@
 
 
 import unittest
+import ee
 
-from eegeolab import calculators
+from eegeolab.bandmath.ndvi import NDVI
 
 
-class TestEegeolab(unittest.TestCase):
+class TestNDVICalculator(unittest.TestCase):
     """Tests for `eegeolab` package."""
 
     def setUp(self):
+        ee.Initialize()
         """Set up test fixtures, if any."""
 
     def tearDown(self):
