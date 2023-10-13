@@ -1,4 +1,0 @@
- 
-# eegeolab module
-
-::: eegeolab.eegeolab
