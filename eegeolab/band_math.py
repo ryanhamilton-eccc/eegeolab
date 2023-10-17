@@ -34,14 +34,14 @@ class BandMathatics:
         return self.add(image)
 
     @abstractmethod
-    def compute(self, image: ee.Image):
+    def compute(self, image: ee.Image) -> ee.Image:
         """Computes the index for the defined image, based on the equation
 
         Args:
             image (ee.Image): Image to compute index from
 
         Returns:
-            _type_: the index image
+            ee.Image: the index image
         """
         pass
 
