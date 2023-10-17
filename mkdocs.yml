@@ -83,5 +83,4 @@ nav:
         - examples/intro.ipynb
         - examples/compute_ndvi.ipynb
     - API Reference:
-          - eegeolab module: eegeolab.md
-          - common module: common.md
+          - band_math module: band_math.md
