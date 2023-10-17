@@ -1,4 +1,4 @@
-# bandmath/ndvi.py
+# eegeolab/bandmath/ndvi.py
 """
 Provides a class and methods for calculating NDVI
 
@@ -7,15 +7,54 @@ functionality to map the calculator to and Image Collection, add to a indvivual 
 the index
 
 Examples:
-    >>> from bandmath.ndvi import *
+    >>> from band_math import NDVI
     >>> import ee
     >>> ee.Initialize()
     >>> ndvi_calc = NDVI(nir='B4', red='B4')
     >>> ndvi_calc.compute(image)
 """
 
-from typing import Any
+from abc import ABC, abstractmethod
+from typing import Any, Optional
 import ee
+
+
+class BandMathatics:
+    """Abstract Base Class for Band Math Calculators"""
+
+    def __call__(self, image: ee.Image) -> ee.Image:
+        """Makes the calculator callable, class camp be mapped as an algo to an Image Collection
+
+        Args:
+            image (ee.Image): Image to compute index
+
+        Returns:
+            ee.Image: the origianl image with the index image appended to it
+        """
+        return self.add(image)
+
+    @abstractmethod
+    def compute(self, image: ee.Image):
+        """Computes the index for the defined image, based on the equation
+
+        Args:
+            image (ee.Image): Image to compute index from
+
+        Returns:
+            _type_: the index image
+        """
+        pass
+
+    def add(self, image: ee.Image) -> ee.Image:
+        """Adds the computed index to the defined image, calls the compute method
+
+        Args:
+            image (ee.Image): Image to compute index from
+
+        Returns:
+            ee.Image: the original image with the index band appended to it.
+        """
+        return image.addBands(self.compute(image))
 
 
 class NDVI:

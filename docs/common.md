@@ -1,3 +1,3 @@
 # Calculators
 
-::: eegeolab.calculators
+::: eegeolab.bandmath.ndvi
