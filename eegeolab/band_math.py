@@ -19,7 +19,7 @@ from typing import Any, Optional
 import ee
 
 
-class BandMathatics:
+class BandMathatics(ABC):
     """Abstract Base Class for Band Math Calculators"""
 
     def __call__(self, image: ee.Image) -> ee.Image:
@@ -57,7 +57,7 @@ class BandMathatics:
         return image.addBands(self.compute(image))
 
 
-class NDVI:
+class NDVI(BandMathatics):
     def __init__(self, nir: str, red: str, name: str = None) -> None:
         """NDVI Calculator Class
 
