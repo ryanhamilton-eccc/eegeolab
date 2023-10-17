@@ -70,17 +70,6 @@ class NDVI(BandMathatics):
         self.red = red
         self.name = name
 
-    def __call__(self, image: ee.Image) -> ee.Image:
-        """Makes the calculator callable, class camp be mapped as an algo to an Image Collection
-
-        Args:
-            image (ee.Image): Image to compute NDVI
-
-        Returns:
-            ee.Image: the origianl image with the ndvi image appended to it
-        """
-        return self.add(image)
-
     @property
     def name(self):
         return self._name
@@ -99,14 +88,3 @@ class NDVI(BandMathatics):
             ee.Image: a ndvi image from the input image
         """
         return image.normalizedDifference([self.nir, self.red]).rename(self.name)
-
-    def add(self, image: ee.Image) -> ee.Image:
-        """Adds the computed index to the defined image, calls the compute method
-
-        Args:
-            image (ee.Image): Image to compute ndvi from
-
-        Returns:
-            ee.Image: the original image with the NDVI band appended to it.
-        """
-        return image.addBands(self.compute(image))
